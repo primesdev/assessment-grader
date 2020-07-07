@@ -59,3 +59,53 @@ def update_google_sheet(service, spreadsheet_id, range_to_update, rows):
       return
   
   return response
+
+def batch_update_google_sheet(service, spreadsheet_id, rows):
+    major_dim = "COLUMNS"
+    start_row_num = 12
+    end_row_num = start_row_num + len(rows[0])
+    obj_1_range = f'D{start_row_num}:Q{end_row_num}'
+    obj_2_range = f'AG{start_row_num}:AT{end_row_num}'
+    obj_3_range = f'BJ{start_row_num}:BP{end_row_num}'
+    obj_4_range = f'CF{start_row_num}:CL{end_row_num}'
+    obj_5_range = f'DB{start_row_num}:DG{end_row_num}'
+    obj_6_range = f'DW{start_row_num}:EC{end_row_num}'
+
+    body = {
+        "valueInputOption": "USER_ENTERED",
+        "data": [
+            {
+            "majorDimension": major_dim,
+            "range": obj_1_range,
+            "values": rows[0:13]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_2_range,
+            "values": rows[14:27]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_3_range,
+            "values": rows[28:34]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_4_range,
+            "values": rows[35:41]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_5_range,
+            "values": rows[42:47]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_6_range,
+            "values": rows[48:54]
+            }
+        ]
+    }
+    request = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+    response = request.execute()
+    return response
