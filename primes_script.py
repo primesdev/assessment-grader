@@ -1,19 +1,20 @@
 from pprint import pprint
-from sheet_service import get_sheet_range, update_google_sheet, batch_update_google_sheet
+from sheet_service import batch_update_objective_rubric, create_new_sheet, get_sheet_range, push_csv_to_gsheet, update_google_sheet
 from google_service import get_google_sheet_service
-from upload_google_sheet import find_sheet_id_by_name, push_csv_to_gsheet
-from create_new_sheet import create_new_sheet
 import numpy as np
+import json
 
-# Survey ids and ranges for template sheets.
-CSV_FILE_PATH = "resources/test/SurveyMonkey Data - Jeremy Test.csv"
-SURVEY_MONKEY_SPREADSHEET_ID = '1GFt9XSIfjykkpWqiaLRamSZC8ad-8DNW02i9jGKy_IM'
-SURVEY_MONKEY_SPREADSHEET_RANGE = 'J1:EN1000'
-SCORE_SHEET_TEMPLATE_ID = '1EBmFujKhO84_DEZye3-kPag_-G2pWU5pUec_8YbAp3Q'#'1coMbBVBZn8PLlXwXIQGHY3HYoitzSxhxrR7huEnu3Fk'
-SCORE_SHEET_RESPONSE_RANGE = 'Sheet1!B1:EN1000'
-SCORE_SHEET_OBJECTIVE_RANGE = 'B259:AU368'
-MENTEE_OBJECTIVE_SCORE_SHEET_ID = '1GbX4ja3mPaAzbqI3STzzSWwCbdX-WOYf33i9y2F2zzA'
-MENTEE_OBJECTIVE_SCORE_SHEET_RANGE = 'Cohort!D12:Q53'
+# Load Properties from JSON file.
+with open('properties.json') as assessment_ranges_sheet:
+      properties_dic = json.load(assessment_ranges_sheet)
+SURVEY_MONKEY_SPREADSHEET_RANGE = properties_dic["survey_monkey_spreadsheet_range"]
+SCORE_SHEET_RESPONSE_RANGE = properties_dic["score_sheet_response_range"]
+SCORE_SHEET_OBJECTIVE_RANGE = properties_dic["score_sheet_objective_range"]
+MENTEE_OBJECTIVE_SCORE_SHEET_RANGE = properties_dic["mentee_objective_score_sheet_range"]
+CSV_FILE_PATH = properties_dic["csv_file_path"]
+SURVEY_MONKEY_SPREADSHEET_ID = properties_dic["survey_monkey_spreadsheet_id"]
+SCORE_SHEET_TEMPLATE_ID = properties_dic["score_sheet_template_id"]#'1coMbBVBZn8PLlXwXIQGHY3HYoitzSxhxrR7huEnu3Fk'
+MENTEE_OBJECTIVE_SCORE_SHEET_ID = properties_dic["mentee_objective_scoresheet_id"]
 
 def main():
     """Shows basic usage of the Sheets API.
@@ -48,9 +49,8 @@ def main():
     cohort_score_list = objective_score_rows[1::2]
 
     # TODO Convert to row range update, will need to seperate them out
-    objective_update_rows = batch_update_google_sheet(service, MENTEE_OBJECTIVE_SCORE_SHEET_ID, cohort_score_list)
+    objective_update_rows = batch_update_objective_rubric(service, MENTEE_OBJECTIVE_SCORE_SHEET_ID, cohort_score_list)
     
-
 
 
 if __name__ == '__main__':
