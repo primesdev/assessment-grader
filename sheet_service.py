@@ -59,3 +59,98 @@ def update_google_sheet(service, spreadsheet_id, range_to_update, rows):
       return
   
   return response
+
+def batch_update_objective_rubric(service, spreadsheet_id, rows):
+    major_dim = "COLUMNS"
+    start_row_num = 12
+    end_row_num = start_row_num + len(rows[0])
+    obj_1_range = f'D{start_row_num}:Q{end_row_num}'
+    obj_2_range = f'AG{start_row_num}:AT{end_row_num}'
+    obj_3_range = f'BJ{start_row_num}:BP{end_row_num}'
+    obj_4_range = f'CF{start_row_num}:CL{end_row_num}'
+    obj_5_range = f'DB{start_row_num}:DG{end_row_num}'
+    obj_6_range = f'DW{start_row_num}:EC{end_row_num}'
+
+    body = {
+        "valueInputOption": "USER_ENTERED",
+        "data": [
+            {
+            "majorDimension": major_dim,
+            "range": obj_1_range,
+            "values": rows[0:13]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_2_range,
+            "values": rows[14:27]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_3_range,
+            "values": rows[28:34]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_4_range,
+            "values": rows[35:41]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_5_range,
+            "values": rows[42:47]
+            },
+            {
+            "majorDimension": major_dim,
+            "range": obj_6_range,
+            "values": rows[48:54]
+            }
+        ]
+    }
+    request = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+    response = request.execute()
+    return response
+
+
+def create_new_sheet(service, name):
+  spreadsheet_body = {
+    "properties": {
+      "title": name
+    }
+  }
+
+  request = service.spreadsheets().create(body=spreadsheet_body)
+  response = request.execute()
+  return response
+
+def push_csv_to_gsheet(service, csv_path, spreadsheet_id, sheet_id):
+  """Pushes a csv file to google sheets api.
+
+  Args:
+      service ([Google resource]): [resource for accessing sheets api]
+      csv_path ([string]): [filepath for csv file to be uploaded]
+      spreadsheet_id ([string]): [id of spreadsheet to upload file]
+      sheet_id ([string]): [id for which worksheet to upload data]
+
+  Returns:
+      [Google Spreadsheet]: [Spreadsheet includes id, sheets]
+  """  
+  API = service
+  with open(csv_path, 'r') as csv_file:
+      csvContents = csv_file.read()
+  body = {
+      'requests': [{
+          'pasteData': {
+              "coordinate": {
+                  "sheetId": sheet_id,
+                  "rowIndex": "0",  # adapt this if you need different positioning
+                  "columnIndex": "0", # adapt this if you need different positioning
+              },
+              "data": csvContents,
+              "type": 'PASTE_NORMAL',
+              "delimiter": ',',
+          }
+      }]
+  }
+  request = API.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+  response = request.execute()
+  return response
