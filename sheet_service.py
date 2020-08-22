@@ -33,9 +33,9 @@ def update_google_sheet(service, spreadsheet_id, range_to_update, rows):
 
   Args:
       service ([Resource]): object for interacting w/Google API
-      spreadsheet_id ([string]): [Id of spreadsheet to update]
-      range_to_update ([string]): [Google Sheets notation string for the range of cells to update]
-      rows ([array]): [Array of rows to insert]
+      spreadsheet_id ([string]): Id of spreadsheet to update
+      range_to_update ([string]): Google Sheets notation string for the range of cells to update
+      rows ([array]): Array of rows to insert
   """  
   # The ID of the spreadsheet to update.
   spreadsheet_id = spreadsheet_id  # TODO: Update placeholder value.
@@ -60,10 +60,12 @@ def update_google_sheet(service, spreadsheet_id, range_to_update, rows):
   
   return response
 
-def batch_update_objective_rubric(service, spreadsheet_id, rows):
+def batch_update_objective_rubric(service, mentee_names, spreadsheet_id, rows):
     major_dim = "COLUMNS"
     start_row_num = 12
-    end_row_num = start_row_num + len(rows[0])
+    row_length = len(rows[0])
+    end_row_num = start_row_num + row_length
+    mentee_column_range = f'A{start_row_num}:A{end_row_num}'
     obj_1_range = f'D{start_row_num}:Q{end_row_num}'
     obj_2_range = f'AG{start_row_num}:AT{end_row_num}'
     obj_3_range = f'BJ{start_row_num}:BP{end_row_num}'
@@ -74,6 +76,11 @@ def batch_update_objective_rubric(service, spreadsheet_id, rows):
     body = {
         "valueInputOption": "USER_ENTERED",
         "data": [
+            {
+                "majorDimension": major_dim,
+                "range": mentee_column_range,
+                "values": [mentee_names]
+            },
             {
             "majorDimension": major_dim,
             "range": obj_1_range,

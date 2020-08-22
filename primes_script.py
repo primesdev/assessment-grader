@@ -12,8 +12,7 @@ SCORE_SHEET_RESPONSE_RANGE = properties_dic["score_sheet_response_range"]
 SCORE_SHEET_OBJECTIVE_RANGE = properties_dic["score_sheet_objective_range"]
 MENTEE_OBJECTIVE_SCORE_SHEET_RANGE = properties_dic["mentee_objective_score_sheet_range"]
 CSV_FILE_PATH = properties_dic["csv_file_path"]
-SURVEY_MONKEY_SPREADSHEET_ID = properties_dic["survey_monkey_spreadsheet_id"]
-SCORE_SHEET_TEMPLATE_ID = properties_dic["score_sheet_template_id"]#'1coMbBVBZn8PLlXwXIQGHY3HYoitzSxhxrR7huEnu3Fk'
+SCORE_SHEET_TEMPLATE_ID = properties_dic["score_sheet_template_id"]
 MENTEE_OBJECTIVE_SCORE_SHEET_ID = properties_dic["mentee_objective_scoresheet_id"]
 
 def main():
@@ -40,6 +39,7 @@ def main():
     
     # skip first two rows in upload
     survey = survey[2:]
+    mentee_names = [i[1] for i in survey]
     updated_rows = update_google_sheet(service, SCORE_SHEET_TEMPLATE_ID, SCORE_SHEET_RESPONSE_RANGE, survey)
 
     # get updated values from the rows
@@ -47,9 +47,10 @@ def main():
 
     # copy A259-AU255 every other row starting with row[1]
     cohort_score_list = objective_score_rows[1::2]
+    cohort_mentee_names = mentee_names[:len(cohort_score_list[0])]
 
     # TODO Convert to row range update, will need to seperate them out
-    objective_update_rows = batch_update_objective_rubric(service, MENTEE_OBJECTIVE_SCORE_SHEET_ID, cohort_score_list)
+    objective_update_rows = batch_update_objective_rubric(service, cohort_mentee_names, MENTEE_OBJECTIVE_SCORE_SHEET_ID, cohort_score_list)
     
 
 
