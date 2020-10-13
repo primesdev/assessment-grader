@@ -5,159 +5,62 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import json
 
-def get_sheet_range(service, spreadsheet_id, range):
-  """Get a google sheet by id
-  
-  Args:
-      service ([Resource]): Google resource to access api
-      spreadsheet_id ([string]): [spreadsheet id]
-      range ([string]): [Google A1 notation string]
-  
-  Returns:
-      [array]: [array object containing the rows in the google sheet]
-  """    
-  sheet = service.spreadsheets()
-  result = sheet.values().get(spreadsheetId=spreadsheet_id,
-                              range=range,
-                              ).execute()
-  values = result.get('values', [])
-
-  if not values:
-      print('No data found.')
-      return
-  else:  
-      return values
-
-def update_google_sheet(service, spreadsheet_id, range_to_update, rows):
-  """Update a Google Sheet
-
-  Args:
-      service ([Resource]): object for interacting w/Google API
-      spreadsheet_id ([string]): Id of spreadsheet to update
-      range_to_update ([string]): Google Sheets notation string for the range of cells to update
-      rows ([array]): Array of rows to insert
-  """  
-  # The ID of the spreadsheet to update.
-  spreadsheet_id = spreadsheet_id  # TODO: Update placeholder value.
-
-  # The A1 notation of the values to update.
-  range_ = range_to_update # TODO: Update placeholder value.
-
-  # How the input data should be interpreted.
-  value_input_option = 'USER_ENTERED'  # TODO: Update placeholder value.
-
-  value_range_body = {
-    "range": range_to_update,
-    "values":rows,
-    "majorDimension" : "COLUMNS"
-   }
-
-  request = service.spreadsheets().values().update(spreadsheetId=spreadsheet_id, range=range_, valueInputOption=value_input_option, body=value_range_body)
-  response = request.execute()
-  if not response:
-      print("no response for sheet update request")
-      return
-  
-  return response
-
-def batch_update_objective_rubric(service, mentee_names, spreadsheet_id, rows):
-    major_dim = "COLUMNS"
-    start_row_num = 12
-    row_length = len(rows[0])
-    end_row_num = start_row_num + row_length
-    mentee_column_range = f'A{start_row_num}:A{end_row_num}'
-    obj_1_range = f'D{start_row_num}:Q{end_row_num}'
-    obj_2_range = f'AG{start_row_num}:AT{end_row_num}'
-    obj_3_range = f'BJ{start_row_num}:BP{end_row_num}'
-    obj_4_range = f'CF{start_row_num}:CL{end_row_num}'
-    obj_5_range = f'DB{start_row_num}:DG{end_row_num}'
-    obj_6_range = f'DW{start_row_num}:EC{end_row_num}'
-
+def add_google_sheet(service, spreadsheet_id, sheet_name, rows):
     body = {
-        "valueInputOption": "USER_ENTERED",
-        "data": [
+        "requests": [
             {
-                "majorDimension": major_dim,
-                "range": mentee_column_range,
-                "values": [mentee_names]
-            },
-            {
-            "majorDimension": major_dim,
-            "range": obj_1_range,
-            "values": rows[0:13]
-            },
-            {
-            "majorDimension": major_dim,
-            "range": obj_2_range,
-            "values": rows[14:27]
-            },
-            {
-            "majorDimension": major_dim,
-            "range": obj_3_range,
-            "values": rows[28:34]
-            },
-            {
-            "majorDimension": major_dim,
-            "range": obj_4_range,
-            "values": rows[35:41]
-            },
-            {
-            "majorDimension": major_dim,
-            "range": obj_5_range,
-            "values": rows[42:47]
-            },
-            {
-            "majorDimension": major_dim,
-            "range": obj_6_range,
-            "values": rows[48:54]
+                "addSheet": {
+                    "properties": {
+                    "title": sheet_name,
+                    }
+                }
             }
         ]
     }
-    request = service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+    request = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
     response = request.execute()
+    if not response:
+        print("no response for sheet update request")
+        return
+
     return response
 
-
-def create_new_sheet(service, name):
-  spreadsheet_body = {
-    "properties": {
-      "title": name
+def clear_sheet_keep_formatting(service, spreadsheet_id, sheet_id):
+    body = {
+        "requests": [
+            {
+                "updateCells": {
+                    "range": {
+                    "sheetId": sheet_id,
+                    },
+                    "fields": "userEnteredValue"
+                }
+            }
+        ]
     }
-  }
+    request = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+    response = request.execute()
+    if not response:
+        print("no response for sheet update request")
+        return
 
-  request = service.spreadsheets().create(body=spreadsheet_body)
-  response = request.execute()
-  return response
+    return response
 
-def push_csv_to_gsheet(service, csv_path, spreadsheet_id, sheet_id):
-  """Pushes a csv file to google sheets api.
+def duplicate_sheet_func(service, spreadsheet_id, sheet_id, duplicate_sheet_name):
+    body = {
+            "requests": [
+                {
+                    "duplicateSheet": {
+                        "sourceSheetId": sheet_id,
+                        "newSheetName": duplicate_sheet_name
+                    }
+                }
+            ]
+        }
+    request = service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+    response = request.execute()
+    if not response:
+        print("no response for sheet update request")
+        return
 
-  Args:
-      service ([Google resource]): [resource for accessing sheets api]
-      csv_path ([string]): [filepath for csv file to be uploaded]
-      spreadsheet_id ([string]): [id of spreadsheet to upload file]
-      sheet_id ([string]): [id for which worksheet to upload data]
-
-  Returns:
-      [Google Spreadsheet]: [Spreadsheet includes id, sheets]
-  """  
-  API = service
-  with open(csv_path, 'r') as csv_file:
-      csvContents = csv_file.read()
-  body = {
-      'requests': [{
-          'pasteData': {
-              "coordinate": {
-                  "sheetId": sheet_id,
-                  "rowIndex": "0",  # adapt this if you need different positioning
-                  "columnIndex": "0", # adapt this if you need different positioning
-              },
-              "data": csvContents,
-              "type": 'PASTE_NORMAL',
-              "delimiter": ',',
-          }
-      }]
-  }
-  request = API.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=body)
-  response = request.execute()
-  return response
+    return response
