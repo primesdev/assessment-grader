@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 token.pickle
 .DS_Store
+.vscode/settings.json
