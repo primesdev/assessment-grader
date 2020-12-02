@@ -3,3 +3,42 @@
 ## sub-objectives (e.g. 1.1)
 ### Questions within sub-objectives
 #### Answers to numerical value mapping
+- Objective 1
+  - 1
+    - Q1
+      - "Strongly disagree": 1
+      - "Disagree": 0.75
+      - "Somewhat disagree": 0.5
+      - "Agree", 0.25
+      - "Strongly agree": 0
+    - Q2
+      - "Strongly disagree": 1
+      - "Disagree": 0.75
+      - "Somewhat disagree": 0.5
+      - "Agree", 0.25
+      - "Strongly agree": 0
+  - 2
+    - Q3
+      - "0 / I do not set personal goals" : 0
+      - "1" : 0.2
+      - "2": 0.4
+      - "3": 0.6
+      - "4": 0.8
+      - "Over 4 goals": 1
+  - 3A
+  - 5B
+  - 6
+  - 7C
+  - 8
+  - 9
+  - 10
+  - 11D
+  - 12E
+  - 13
+  - 14
+  - 15
+- Objective 2
+- Objective 3
+- Objective 4
+- Objective 5
+- Objective 6
